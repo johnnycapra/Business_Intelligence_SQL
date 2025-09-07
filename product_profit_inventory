@@ -1,0 +1,12 @@
+SELECT pl.productLine, pl.textDescription,
+	COUNT(DISTINCT p.productCode) AS productCount,
+	ROUND(AVG(p.MSRP - p.buyPrice)::numeric, 2) AS avgProfitPerUnit,
+	ROUND(AVG((p.MSRP - p.buyPrice) / p.buyPrice * 100)::numeric, 2) AS avgProfitMarginPct,
+	ROUND(SUM(od.quantityOrdered * (od.priceEach - p.buyPrice))::numeric,2) AS totalProfit,
+	ROUND(AVG(p.quantityInStock)::numeric, 0) AS avgInventoryLevel,
+	ROUND((SUM(od.quantityOrdered)::numeric / AVG(p.quantityInStock)::numeric),2) AS inventoryTurnoverRatio
+FROM productlines pl
+	INNER JOIN products p ON pl.productLine = p.productLine
+	INNER JOIN orderdetails od ON p.productCode = od.productCode
+GROUP BY pl.productLine, pl.textDescription
+ORDER BY totalProfit DESC;

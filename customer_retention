@@ -1,0 +1,12 @@
+SELECT c.customerNumber, c.customerName, c.country,
+	COUNT(o.orderNumber) AS totalOrders,
+	ROUND(SUM(od.quantityOrdered * od.priceEach)::numeric, 2) AS totalSpent,
+	MAX(o.orderDate) AS lastOrderDate,
+	CURRENT_DATE - MAX(o.orderDate::date) AS daysSinceLastOrder
+FROM customers c
+	INNER JOIN orders o ON c.customerNumber = o.customerNumber
+	INNER JOIN orderdetails od ON o.orderNumber = od.orderNumber
+GROUP BY c.customerNumber, c.customerName, c.country
+HAVING SUM(od.quantityOrdered * od.priceEach) > 5000
+	AND MAX(o.orderDate::date) < CURRENT_DATE - INTERVAL '180 days'
+ORDER BY totalSpent DESC, daysSinceLastOrder DESC;

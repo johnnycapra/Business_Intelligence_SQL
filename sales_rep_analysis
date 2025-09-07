@@ -1,0 +1,14 @@
+SELECT e.employeeNumber, e.firstName AS salesRepName,
+	COUNT(DISTINCT c.customerNumber) AS activeCustomers,
+	COUNT(DISTINCT o.orderNumber) AS totalOrders,
+	ROUND(SUM(od.quantityOrdered * od.priceEach)::numeric, 2) AS totalSalesRevenue,
+	ROUND(AVG(od.quantityOrdered * od.priceEach)::numeric, 2) AS avgOrderValue
+FROM employees e
+	INNER JOIN customers c ON e.employeeNumber = c.salesRepEmployeeNumber
+	INNER JOIN orders o ON c.customerNumber = o.customerNumber
+	INNER JOIN orderdetails od ON o.orderNumber = od.orderNumber
+WHERE e.jobTitle LIKE '%Sales Rep%'
+GROUP BY e.employeeNumber, e.firstName, e.lastName
+HAVING SUM(od.quantityOrdered * od.priceEach) > 0
+ORDER BY totalSalesRevenue DESC;
+	
